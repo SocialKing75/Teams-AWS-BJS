@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "README Validation (5 critères)",
+      "trigger": "PostToolUse",
+      "description": "Valide que le README contient: problématique+solution, personas, lien Vercel, installation, brief global (max 5 phrases)",
+      "matcher": "fs_write|str_replace|fs_append",
+      "action": {
+        "type": "command",
+        "command": "python .kiro/hooks/readme-validation.py",
+        "timeout": 10
+      }
+    }
+  ]
+}
