@@ -28,17 +28,29 @@ npm run dev -- --host     # http://<IP du PC>:5173 depuis un téléphone sur le 
 npm run build             # dist/ : fichiers statiques à ouvrir ou héberger n'importe où
 ```
 
-L'interface lit `web/src/data.json`, produit par le pipeline : aucun calcul côté navigateur, les chiffres sont ceux des CSV. Entièrement en français, distances en yards.
+**En ligne** : https://fenetre-reception-coach.vercel.app (hébergé sur Vercel ; `web/vercel.json` lance `npm run build` et sert `dist/` ; redéployer avec `cd web && vercel deploy --prod`).
 
-Chaque écran est une scène sur un terrain dessiné en SVG, en vue de dessus (2D) ou en caméra inclinée façon retransmission (3D), bouton dans l'en-tête :
-- **Adversaire** : une carte par route à attaquer ou à éviter. Le receveur court sa route, le défenseur (pion aux couleurs et au logo de l'équipe) le suit, le ballon vole ; le cercle blanc est la fenêtre de réception mesurée, qui passe de sa valeur au lancer à sa valeur à l'arrivée ; le cercle jaune est la moyenne de la ligue sur la même route. L'écart à la ligue est le chiffre en grand.
+L'interface lit uniquement des fichiers produits par le pipeline, aucun chiffre n'est saisi à la main : `web/src/data.json` (cartes, synthèses, classement, couleurs) et les fichiers du contrat d'équipe `web/public/contrat/matchups.json` (cellules couverture × man/zone × route × profondeur × down × distance, avec sommes et effectifs) et `play.json` (actions réelles image par image). Entièrement en français, distances en yards.
+
+À l'ouverture, un écran noir présente les logos NFL et AWS de part et d'autre, puis s'ouvre en deux volets (un toucher le passe ; mouvement réduit si le système le demande). Chaque écran est une scène sur un terrain dessiné en SVG, en vue de dessus (2D) ou en caméra inclinée façon retransmission (3D), bouton dans l'en-tête :
+- **Adversaire** : une carte par route à attaquer ou à éviter. La carte rejoue l'action réelle de cette défense la plus proche de sa moyenne sur la route : trajectoires mesurées du receveur ciblé et du défenseur le plus proche au lancer (pion au logo de l'équipe), ballon interpolé en ligne droite du passeur au point de chute. Cercle blanc : fenêtre de réception ; cercle jaune : moyenne de la ligue sur la route. L'écart à la ligue est le chiffre en grand.
 - **Man/zone** : quatre cibles vues de dessus (man ou zone, passe courte ou profonde) : anneau au lancer, disque à l'arrivée, repère ligue en jaune. Sur tablette / PC, comparaison de deux défenses côte à côte.
-- **Situation** : disques posés sur le gazon, lignes = down, colonnes = distance à franchir, taille = fenêtre.
-- **Ligue** : les 32 logos posés sur une règle en yards selon leur fenêtre moyenne à l'arrivée ; sur tablette / PC, heatmap couverture × route en tuiles (relief en 3D).
+- **Matrice** : séparation à l'arrivée par route × couverture pour toute la ligue, filtrable par couverture, profondeur de passe, down et distance à gagner. Chaque filtre ré-agrège les cellules de `matchups.json` par Σ somme / Σ n (jamais une moyenne de moyennes). Couleur et libellé : contesté < 1 yd, serré 1-2, ouvert 2-3, grand ouvert ≥ 3 ; cases grisées sous 10 passes. Une case touchée ouvre sa fiche (part des actions ouvertes / contestées, fenêtre au lancer, intervalle de confiance à 95 %) ; changer un filtre la ferme.
+- **Ligue** : les 32 logos posés sur une règle en yards selon leur fenêtre moyenne à l'arrivée.
 
-Téléphone : une colonne, un message par écran, chiffre clé en grand, zones tactiles ≥ 44 px, navigation en bas au pouce, choix de l'équipe par grille de logos. À partir de 768 px : logos à gauche, scène au centre ; à partir de 1100 px, plan de jeu à droite. Le tracé des routes est schématique : seuls les rayons des cercles sont des mesures. Captures dans `outputs/capture_*.png`.
+Téléphone : une colonne, un message par écran, chiffre clé en grand, zones tactiles ≥ 44 px, navigation en bas au pouce, choix de l'équipe par grille de logos. À partir de 768 px : logos à gauche, scène au centre, navigation en haut ; à partir de 1100 px (PC) : l'onglet Adversaire montre tout le plan de match (routes à attaquer et à éviter côte à côte), les autres onglets gardent le plan de jeu à droite, contenu centré sur 1440 px.
 
-**Logos et couleurs** : table publique nflverse (`data/reference/equipes_nflverse.csv`), jointe par abréviation d'équipe ; le pipeline télécharge les logos dans `web/public/logos/` (non versionné). Les logos sont des marques de la NFL et des clubs, utilisés ici pour identifier les équipes dans un projet de compétition non commercial. Sans réseau, chaque logo est remplacé par un badge aux couleurs de l'équipe.
+### Vidéo de démo (motion design)
+
+`outputs/demo_app.mp4` (1920×1080, H.264, environ 75 s, sans son) : l'app tourne en vrai dans un téléphone et un script la pilote comme un coach ; à côté, des titres animés affichent les métriques **lues dans l'app au moment de l'enregistrement** (aucun chiffre écrit en dur), puis les vérifications tirées de `outputs/rapport_verification.md`. Pour la régénérer (serveur de dev lancé) :
+
+```bash
+python video/enregistrer_demo.py --app http://localhost:5173/ --sortie outputs/demo_app.mp4
+```
+
+La défense mise en avant est choisie par les données (la carte « à attaquer » la plus marquée parmi celles de confiance élevée). Mise en scène : `video/studio.html` ; capture image par image de Chrome (Playwright), montage ffmpeg.
+
+**Logos et couleurs** : logos NFL et AWS dans `web/public/marques/` (`aws-blanc.svg` : texte passé en blanc pour l'écran noir d'ouverture) ; logos des clubs : table publique nflverse (`data/reference/equipes_nflverse.csv`), jointe par abréviation d'équipe ; le pipeline télécharge les logos dans `web/public/logos/` (non versionné). Les logos sont des marques de la NFL et des clubs, utilisés ici pour identifier les équipes dans un projet de compétition non commercial. Sans réseau, chaque logo est remplacé par un badge aux couleurs de l'équipe.
 
 ## La métrique
 
@@ -89,7 +101,8 @@ src/brief.py          brief visuel généré depuis les CSV
 src/export_web.py     export des CSV en JSON pour l'interface
 src/logos.py          logos des équipes (table publique nflverse)
 data/reference/       equipes_nflverse.csv (noms, couleurs, logos)
-web/                  interface React (Vite) : src/App.jsx, src/styles.css, src/data.json
+web/                  interface React (Vite) : src/App.jsx, src/styles.css, src/data.json, public/contrat/*.json
+video/                vidéo de démo : studio.html (mise en scène), enregistrer_demo.py (pilotage + montage)
 docs/                 documentation des données
 outputs/              CSV de résultats, rapports, brief, captures d'écran
 ```

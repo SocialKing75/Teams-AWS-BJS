@@ -3,7 +3,7 @@
 // le receveur court sa route, le défenseur le suit, le cercle blanc est la fenêtre
 // de réception (rayon = distance au défenseur le plus proche), le cercle jaune la moyenne de la ligue.
 // Tous les chiffres viennent de data.json, exporté des CSV par src/export_web.py.
-import { Fragment, useEffect, useId, useMemo, useState } from "react";
+import { Fragment, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import data from "./data.json";
 
 const BLEU = "#2a78d6";
@@ -376,6 +376,31 @@ function EcranMatrice({ matchups, d3 }) {
   const [down, setDown] = useState("tous");
   const [dist, setDist] = useState("tous");
   const [sel, setSel] = useState(null);
+  // Changer un filtre ferme la fiche : ses chiffres ne correspondraient plus à la sélection
+  const filtrer = (changer) => (v) => { changer(v); setSel(null); };
+  useEffect(() => {
+    if (!sel) return undefined;
+    const echap = (ev) => ev.key === "Escape" && setSel(null);
+    window.addEventListener("keydown", echap);
+    return () => window.removeEventListener("keydown", echap);
+  }, [sel]);
+  // En 3D, la grille inclinée laisse un vide au-dessus : on le mesure une fois l'inclinaison finie et on le résorbe
+  const scene = useRef(null);
+  const [marge, setMarge] = useState(0);
+  useLayoutEffect(() => {
+    const el = scene.current;
+    if (!el) return undefined;
+    const grille = el.querySelector(".matrice");
+    const mesurer = () => {
+      if (!d3) { setMarge(0); return; }
+      const haut = Math.min(...[...grille.children].map((c) => c.getBoundingClientRect().top));
+      setMarge(Math.max(0, haut - el.getBoundingClientRect().top - 30));
+    };
+    mesurer();
+    grille.addEventListener("transitionend", mesurer);
+    window.addEventListener("resize", mesurer);
+    return () => { grille.removeEventListener("transitionend", mesurer); window.removeEventListener("resize", mesurer); };
+  }, [d3, matchups, mz, prof, down, dist]);
   if (!matchups) return <div className="squelette" aria-busy="true"><div /><div /><div /></div>;
   const lignes = matchups.filter((r) => (mz === "tous" || r.man_zone === mz) && (prof === "tous" || r.depth === prof)
     && (down === "tous" || String(r.down) === down) && (dist === "tous" || r.dist_bucket === dist));
@@ -388,13 +413,17 @@ function EcranMatrice({ matchups, d3 }) {
       <h2 className="titre-ecran">Où le receveur finit ouvert</h2>
       <p className="note">Séparation à l'arrivée du ballon (yd) entre le receveur ciblé et le défenseur le plus proche au lancer, par route et par couverture. Ligue entière.</p>
       <div className="filtres-matrice">
-        <Segment label="Couverture" valeur={mz} onChange={setMz} options={[["tous", "Man + zone"], ["Man", "Man"], ["Zone", "Zone"]]} />
-        <Segment label="Profondeur" valeur={prof} onChange={setProf} options={[["tous", "Toutes"], ["short", "Courtes"], ["deep", "Profondes"]]} />
-        <Segment label="Down" valeur={down} onChange={setDown} options={[["tous", "Tous"], ["1", "1er"], ["2", "2e"], ["3", "3e"], ["4", "4e"]]} />
-        <Segment label="Distance" valeur={dist} onChange={setDist} options={[["tous", "Toute dist."], ["1-3", "1-3"], ["4-6", "4-6"], ["7+", "7+"]]} />
+        <div className="filtre"><span className="filtre-titre">Couverture</span>
+          <Segment label="Couverture" valeur={mz} onChange={filtrer(setMz)} options={[["tous", "Man + zone"], ["Man", "Man"], ["Zone", "Zone"]]} /></div>
+        <div className="filtre"><span className="filtre-titre">Profondeur de la passe</span>
+          <Segment label="Profondeur" valeur={prof} onChange={filtrer(setProf)} options={[["tous", "Toutes"], ["short", <>Courtes<small>moins de 15 yd</small></>], ["deep", <>Profondes<small>15 yd et plus</small></>]]} /></div>
+        <div className="filtre"><span className="filtre-titre">Down</span>
+          <Segment label="Down" valeur={down} onChange={filtrer(setDown)} options={[["tous", <>Tous<small>downs</small></>], ["1", <>1er<small>down</small></>], ["2", <>2e<small>down</small></>], ["3", <>3e<small>down</small></>], ["4", <>4e<small>down</small></>]]} /></div>
+        <div className="filtre"><span className="filtre-titre">Distance à gagner (yards to go)</span>
+          <Segment label="Distance" valeur={dist} onChange={filtrer(setDist)} options={[["tous", <>Toutes<small>distances</small></>], ["1-3", <>1 à 3<small>yd à gagner</small></>], ["4-6", <>4 à 6<small>yd à gagner</small></>], ["7+", <>7 et +<small>yd à gagner</small></>]]} /></div>
       </div>
       {total && <p className="resume-matrice"><b>{total.n}</b> passes · séparation moyenne <b>{yd(total.sep)}</b> · {libSep(total.sep)}</p>}
-      <div className={`heatmap-scene ${d3 ? "d3" : ""}`}>
+      <div ref={scene} className={`heatmap-scene ${d3 ? "d3" : ""}`} style={{ marginTop: -marge }}>
         <div className="matrice" style={{ gridTemplateColumns: `62px repeat(${couvs.length}, minmax(0, 1fr))` }}>
           <span />
           {couvs.map((c) => <span key={c} className="hm-entete" title={c}>{ABR_COUV[c]}</span>)}
@@ -511,6 +540,37 @@ const ICONES = {
 };
 const ONGLETS = [["adversaire", "Adversaire"], ["manzone", "Man/zone"], ["matrice", "Matrice"], ["ligue", "Ligue"]];
 
+/** Vrai si la media query correspond (suit les changements de taille de fenêtre). */
+function useMedia(requete) {
+  const [ok, setOk] = useState(() => window.matchMedia(requete).matches);
+  useEffect(() => {
+    const m = window.matchMedia(requete);
+    const suivre = () => setOk(m.matches);
+    m.addEventListener("change", suivre);
+    return () => m.removeEventListener("change", suivre);
+  }, [requete]);
+  return ok;
+}
+
+/** Ouverture : écran noir, logos NFL et AWS de part et d'autre, puis le noir s'ouvre en deux volets.
+ *  Un toucher la passe ; mouvement réduit si le téléphone le demande. */
+function Ouverture() {
+  const [etat, setEtat] = useState("logos"); // logos -> ouvre -> fini
+  useEffect(() => {
+    const reduit = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const t1 = setTimeout(() => setEtat("ouvre"), reduit ? 500 : 1600);
+    const t2 = setTimeout(() => setEtat("fini"), reduit ? 800 : 2700);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+  if (etat === "fini") return null;
+  return (
+    <div className={`ouverture ${etat}`} aria-hidden="true" onClick={() => setEtat("fini")}>
+      <div className="volet gauche"><img src="./marques/nfl.png" alt="" /></div>
+      <div className="volet droite"><img src="./marques/aws-blanc.svg" alt="" /></div>
+    </div>
+  );
+}
+
 export default function App() {
   const [onglet, setOnglet] = useState("adversaire");
   const [abr, setAbr] = useState(data.defenses[0]);
@@ -527,6 +587,10 @@ export default function App() {
   const e = info(abr);
   const cartes = useMemo(() => data.cartes.filter((c) => c.defensive_team === abr).sort((a, b) => a.rang - b.rang), [abr]);
   const cartesGenre = cartes.filter((c) => c.type === genre);
+  const pc = useMedia("(min-width: 1100px)");
+  const rendreCartes = (liste) => liste.length === 0
+    ? <p className="info">Aucune route avec assez de passes dans ce sens pour cette défense.</p>
+    : <div className="cartes">{liste.map((c) => <CarteRoute key={c.route} c={c} abr={abr} d3={d3} action={contrat.plays.find((p) => p.defensive_team === abr && p.route === c.route)} />)}</div>;
 
   return (
     <div className="app" style={{ "--equipe": e.couleur, "--equipe2": e.couleur2 }}>
@@ -558,7 +622,7 @@ export default function App() {
         ))}
       </nav>
 
-      <div className="grille">
+      <div className={`grille onglet-${onglet}`}>
         <aside className="panneau-gauche">
           <SelecteurEquipes abr={abr} onChoix={setAbr} />
           {onglet === "manzone" && (
@@ -575,9 +639,20 @@ export default function App() {
         <main>
           {onglet === "adversaire" && (
             <section>
-              <Segment valeur={genre} onChange={setGenre} label="Sens" options={[["attaquer", "Routes à attaquer"], ["eviter", "Routes à éviter"]]} />
-              {cartesGenre.length === 0 && <p className="info">Aucune route avec assez de passes dans ce sens pour cette défense.</p>}
-              <div className="cartes">{cartesGenre.map((c) => <CarteRoute key={c.route} c={c} abr={abr} d3={d3} action={contrat.plays.find((p) => p.defensive_team === abr && p.route === c.route)} />)}</div>
+              {pc ? (
+                // PC : plan de match complet, les deux sens côte à côte
+                ["attaquer", "eviter"].map((g) => (
+                  <div key={g} className="groupe-cartes" style={{ "--accent": g === "attaquer" ? BLEU : ORANGE }}>
+                    <h2 className="titre-groupe">{g === "attaquer" ? "Routes à attaquer" : "Routes à éviter"}</h2>
+                    {rendreCartes(cartes.filter((c) => c.type === g))}
+                  </div>
+                ))
+              ) : (
+                <>
+                  <Segment valeur={genre} onChange={setGenre} label="Sens" options={[["attaquer", "Routes à attaquer"], ["eviter", "Routes à éviter"]]} />
+                  {rendreCartes(cartesGenre)}
+                </>
+              )}
               <p className="note">Chaque carte rejoue l'action réelle de cette défense la plus proche de sa moyenne sur la route : trajectoires mesurées du receveur ciblé (blanc) et du défenseur le plus proche au lancer (logo), ballon interpolé du passeur au point de chute. Cercle blanc : fenêtre de réception. Cercle jaune : moyenne de la ligue sur la route à l'arrivée. Confiance élevée si ≥ 50 passes et écart ≥ 0,5 yd ; moyenne si ≥ 30 et ≥ 0,3 ; faible sinon.</p>
             </section>
           )}
@@ -604,6 +679,7 @@ export default function App() {
         </aside>
       </div>
 
+      <Ouverture />
       {choix && <SelecteurEquipes abr={abr} onChoix={(d) => { setAbr(d); setChoix(false); }} onFermer={() => setChoix(false)} />}
     </div>
   );
