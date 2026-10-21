@@ -1,5 +1,6 @@
-# Fenêtre de réception — outil coach — Données saison 2023
+# NFL Coach Cockpit - Analyse des Fenêtres de Réception
 
+<<<<<<< HEAD
 **Problématique : dans quelles situations la fenêtre de réception se referme-t-elle le moins entre le lancer et l'arrivée du ballon ?**
 
 Utilisateur cible : le coach. Un coordinateur offensif prépare un adversaire (quelles couvertures et quelles routes laissent une fenêtre ouverte à l'arrivée du ballon) ; un coordinateur défensif s'audite (où sa défense referme ou non pendant le vol).
@@ -130,3 +131,6 @@ Nous avons gardé une seule cible, le coach, et une seule métrique, lisible en 
 | 3 — visuel et présentation | visuels coach, fiche adversaire, démo, pitch jury | visuels, présentation |
 
 Points de synchronisation : (1) après le nettoyage, validation commune de l'état des lieux ; (2) après le calcul, la Personne 3 reçoit `outputs/brief_visuel.md` ; (3) 30 minutes avant la fin, relecture croisée : chiffres des visuels contre les CSV, mention « Données 2023 », source, unités.
+=======
+**Problématique :** Les entraîneurs NFL ont besoin d'analyser en temps réel la vitesse de fermeture des fenêtres de réception pour optimiser les décisions de passes. **Solution :** Dashboard React avec analyse prédictive (DuckDB + Plotly) ciblant 3 personas (Coach, Scout, Broadcast) affichant separation, closing velocity et risk scores avec replay 2D synchronisé. **Installation :** `npm install && npm run dev` (nécessite Node 18+, DuckDB via MCP). **Architecture :** Pipeline ETL (tracking NFL → normalization angles 0°=Nord → physics validation v≤13yd/s, a≤8yd/s² → agrégation DuckDB → visualisation React). **Démo live :** [Vercel deployment](https://teams-aws-bjs.vercel.app)
+>>>>>>> 7db2a890808f65cb1ac8e142e64990096374fec2

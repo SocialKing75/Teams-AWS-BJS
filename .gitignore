@@ -5,6 +5,16 @@ CLAUDE.md
 .claude.json
 .claude.json.backup
 
+# --- Journal de bord (notes de session, reste en local) ---
+JOURNAL.md
+journal*.md
+SESSION_*.txt
+docs/journal*
+CHANGELOG-dev.md
+
+# --- Cache Vite ---
+.vite/
+
 # --- Données volumineuses NFL (ne pas pousser) ---
 data/
 *.csv

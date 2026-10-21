@@ -44,7 +44,7 @@ main { min-width: 0; }
 .segment button.actif { background: var(--encre); color: #fff; }
 
 /* ---- Cartes route ---- */
-.carte { background: var(--carte); border-radius: 18px; padding: 12px; margin: 0 0 16px; box-shadow: 0 2px 0 var(--accent), 0 6px 18px rgba(0, 0, 0, .08); border-top: 6px solid var(--accent); }
+.carte { background: var(--carte); border-radius: 18px; padding: 12px; margin: 0 0 16px; box-shadow: 0 6px 18px rgba(0, 0, 0, .08); }
 .carte-tete { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
 .carte-route { font-family: var(--titre); font-weight: 800; font-size: 34px; line-height: 1; text-transform: uppercase; }
 .carte-verbe { font-weight: 700; color: var(--accent); font-size: 17px; }
