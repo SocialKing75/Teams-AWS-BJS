@@ -5,9 +5,6 @@ CLAUDE.md
 .claude.json
 .claude.json.backup
 
-# --- Kiro (local, non poussé) ---
-.kiro/
-
 # --- Données volumineuses NFL (ne pas pousser) ---
 data/
 *.csv
