@@ -1,0 +1,10 @@
+[
+  { "nfl_id": 42816, "name": "A. Diggs",      "position": "CB", "team": "DAL", "n_plays": 41, "placement": 4.8, "closing_rate": 0.92, "expected_rate": 0.40, "closing_index": 0.52, "ci": [0.28, 0.76], "exposed_only": true },
+  { "nfl_id": 53421, "name": "P. Surtain",    "position": "CB", "team": "DEN", "n_plays": 38, "placement": 3.9, "closing_rate": 0.81, "expected_rate": 0.42, "closing_index": 0.39, "ci": [0.17, 0.61], "exposed_only": true },
+  { "nfl_id": 47900, "name": "D. James",      "position": "S",  "team": "LAC", "n_plays": 34, "placement": 5.6, "closing_rate": 0.74, "expected_rate": 0.45, "closing_index": 0.29, "ci": [0.05, 0.53], "exposed_only": true },
+  { "nfl_id": 51233, "name": "F. Warner",     "position": "LB", "team": "SF",  "n_plays": 29, "placement": 6.1, "closing_rate": 0.63, "expected_rate": 0.44, "closing_index": 0.19, "ci": [-0.04, 0.42], "exposed_only": true },
+  { "nfl_id": 46012, "name": "T. Hufanga",    "position": "S",  "team": "SF",  "n_plays": 26, "placement": 5.2, "closing_rate": 0.58, "expected_rate": 0.47, "closing_index": 0.11, "ci": [-0.12, 0.34], "exposed_only": true },
+  { "nfl_id": 55110, "name": "J. Jewell",     "position": "LB", "team": "DEN", "n_plays": 23, "placement": 6.4, "closing_rate": 0.41, "expected_rate": 0.46, "closing_index": -0.05, "ci": [-0.28, 0.18], "exposed_only": true },
+  { "nfl_id": 49877, "name": "K. Fuller",     "position": "CB", "team": "MIA", "n_plays": 22, "placement": 4.3, "closing_rate": 0.34, "expected_rate": 0.43, "closing_index": -0.09, "ci": [-0.33, 0.15], "exposed_only": true },
+  { "nfl_id": 52004, "name": "X. McKinney",   "position": "S",  "team": "NYG", "n_plays": 20, "placement": 5.9, "closing_rate": 0.29, "expected_rate": 0.45, "closing_index": -0.16, "ci": [-0.41, 0.09], "exposed_only": true }
+]
