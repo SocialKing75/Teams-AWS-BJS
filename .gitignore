@@ -5,6 +5,16 @@ CLAUDE.md
 .claude.json
 .claude.json.backup
 
+# --- Journal de bord (notes de session, reste en local) ---
+JOURNAL.md
+journal*.md
+SESSION_*.txt
+docs/journal*
+CHANGELOG-dev.md
+
+# --- Cache Vite ---
+.vite/
+
 # --- Données volumineuses NFL (ne pas pousser) ---
 data/
 *.csv
@@ -30,3 +40,141 @@ build/
 # --- OS ---
 .DS_Store
 Thumbs.db
+
+# --- Kiro / outillage (branche stephane) ---
+# ============================================================================
+# Coach Cockpit NFL - .gitignore
+# ============================================================================
+
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# -------------------------
+# Pytest
+# -------------------------
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+
+# -------------------------
+# Jupyter Notebooks
+# -------------------------
+.ipynb_checkpoints
+*.ipynb
+
+# -------------------------
+# Node.js / React
+# -------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp
+.pnp.js
+
+# -------------------------
+# Build Output
+# -------------------------
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# -------------------------
+# Environment Variables
+# -------------------------
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# -------------------------
+# IDEs
+# -------------------------
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# -------------------------
+# Logs
+# -------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# -------------------------
+# DuckDB
+# -------------------------
+*.duckdb
+*.duckdb.wal
+.duckdb_history
+
+# -------------------------
+# Data (Trop Volumineux)
+# -------------------------
+# Ne committer que les fichiers < 100MB
+# Les données tracking sont dans le submodule
+nfl-big-data-bowl-regional-event-data/data/tracking/*.csv
+!nfl-big-data-bowl-regional-event-data/README.md
+
+# Exports générés
+exports/*.csv
+exports/*.json
+
+# -------------------------
+# Temporary Files
+# -------------------------
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+
+# -------------------------
+# OS
+# -------------------------
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# -------------------------
+# Kiro (ne pas committer les logs hooks)
+# -------------------------
+.kiro/logs/

@@ -44,12 +44,12 @@ main { min-width: 0; }
 .segment button.actif { background: var(--encre); color: #fff; }
 
 /* ---- Cartes route ---- */
-.carte { background: var(--carte); border-radius: 18px; padding: 12px; margin: 0 0 16px; box-shadow: 0 2px 0 var(--accent), 0 6px 18px rgba(0, 0, 0, .08); border-top: 6px solid var(--accent); }
+.carte { background: var(--carte); border-radius: 18px; padding: 12px; margin: 0 0 16px; box-shadow: 0 6px 18px rgba(0, 0, 0, .08); }
 .carte-tete { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
 .carte-route { font-family: var(--titre); font-weight: 800; font-size: 34px; line-height: 1; text-transform: uppercase; }
 .carte-verbe { font-weight: 700; color: var(--accent); font-size: 17px; }
 .carte-chiffre { font-family: var(--titre); font-weight: 800; font-size: 52px; line-height: .9; color: var(--accent); text-align: right; }
-.carte-chiffre small { display: block; font-family: "Barlow", sans-serif; font-size: 14px; font-weight: 600; color: var(--encre2); }
+.carte-chiffre small { display: block; margin-top: 6px; font-family: "Barlow", sans-serif; font-size: 14px; font-weight: 600; color: var(--encre2); }
 .carte-detail { margin: 8px 2px 0; font-size: 16px; color: var(--encre2); }
 .carte-detail b { color: var(--encre); }
 .badge { display: inline-block; padding: 1px 10px; border-radius: 999px; font-size: 15px; font-weight: 700; color: #fff; }
@@ -95,17 +95,42 @@ main { min-width: 0; }
 .logo { object-fit: contain; display: block; }
 .logo-badge { display: grid; place-items: center; border-radius: 50%; color: #fff; font-weight: 800; font-family: var(--titre); }
 
-/* ---- Heatmap (tablette / PC) ---- */
-.heatmap-bloc { display: none; }
-.heatmap-scene { perspective: 1000px; }
-.heatmap { display: grid; gap: 3px; transition: transform .6s ease; transform-origin: 50% 100%; }
-.heatmap-scene.d3 .heatmap { transform: rotateX(38deg) rotateZ(-8deg); }
+/* ---- Onglet Matrice (contrat matchups.json) ---- */
+.filtres-matrice { position: relative; z-index: 2; }
+.filtres-matrice .segment { margin-bottom: 10px; }
+.filtre-titre { display: block; font: 700 13px var(--titre); letter-spacing: .6px; text-transform: uppercase; color: var(--encre2); margin: 0 0 4px 2px; }
+.filtres-matrice .segment button { line-height: 1.1; }
+.filtres-matrice .segment button small { display: block; font-size: 11px; font-weight: 600; opacity: .75; margin-top: 2px; }
+.filtres-matrice .segment button { min-height: 44px; font-size: 15px; padding: 0 4px; }
+.resume-matrice { font-size: 16px; margin: 6px 0 10px; }
+.heatmap-scene { perspective: 1400px; perspective-origin: 50% 100%; padding-top: 6px; transition: margin-top .3s ease; }
+.matrice { display: grid; gap: 3px; transition: transform .6s ease; transform-origin: 50% 100%; }
+.heatmap-scene.d3 .matrice { transform: translateY(-1px) rotateX(22deg); }
+.heatmap-scene.d3 .hm-entete { transform: translateY(-26px); }
+/* La scène 3D remonte sous les filtres : seules les cases captent les clics */
+.heatmap-scene { pointer-events: none; }
+.heatmap-scene .hm-case { pointer-events: auto; }
 .heatmap-scene.d3 .hm-case { box-shadow: 0 var(--h, 0) 0 rgba(0, 0, 0, .35); transform: translateY(calc(var(--h, 0) * -1)); }
-.hm-entete { font: 800 13px var(--titre); text-align: center; align-self: end; }
-.hm-ligne { font: 700 13px var(--titre); align-self: center; }
-.hm-case { min-height: 46px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #e6e5e0; transition: transform .6s ease, box-shadow .6s ease; }
+.hm-entete { font: 800 14px var(--titre); text-align: center; align-self: end; padding-bottom: 2px; }
+.hm-ligne { font: 700 14px var(--titre); align-self: center; overflow: hidden; text-overflow: ellipsis; }
+.hm-case { min-height: 44px; min-width: 0; padding: 0; border: 0; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform .6s ease, box-shadow .6s ease; }
 .hm-case b { font: 800 17px var(--titre); }
-.hm-case small { font-size: 11px; opacity: .85; }
+.hm-case small { font-size: 10px; }
+.hm-case.insuffisant { background-image: repeating-linear-gradient(45deg, transparent 0 4px, rgba(0, 0, 0, .06) 4px 8px); }
+.legende-sep { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; font-weight: 600; margin: 12px 0 4px; }
+.legende-sep span { display: inline-flex; align-items: center; gap: 6px; }
+.legende-sep i { width: 16px; height: 16px; border-radius: 4px; display: inline-block; }
+.detail { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--carte); border-radius: 18px 18px 0 0; padding: 16px 16px calc(84px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 30px rgba(0, 0, 0, .25); }
+.detail .fermer { position: absolute; right: 12px; top: 12px; }
+.detail h3 { font: 800 26px var(--titre); text-transform: uppercase; margin: 0 56px 4px 0; }
+.detail p { margin: 4px 0; }
+.detail-chiffre { font: 800 54px var(--titre); line-height: 1; }
+.detail-chiffre span { font-size: 22px; color: var(--encre2); margin-left: 6px; }
+.alerte { background: #fff3cd; border-left: 4px solid #b8860b; padding: 6px 10px; border-radius: 6px; font-weight: 600; }
+.carte-action { margin: 10px 2px 0; font-size: 16px; color: var(--encre2); }
+.carte-action b { color: var(--encre); }
+.squelette div { height: 48px; border-radius: 10px; background: #e6e5e0; margin-bottom: 8px; animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .5; } }
 
 /* ---- Sélecteur d'équipes (logos) ---- */
 .selecteur { position: fixed; inset: 0; z-index: 20; background: var(--fond); overflow-y: auto; padding: 12px 16px 24px; }
@@ -118,7 +143,7 @@ main { min-width: 0; }
 
 /* ---- Recommandations (PC) ---- */
 .panneau-droit h2 { display: flex; align-items: center; gap: 8px; font-family: var(--titre); font-size: 24px; text-transform: uppercase; margin: 0 0 10px; }
-.reco { display: grid; grid-template-columns: 1fr auto; background: var(--carte); border-left: 6px solid var(--accent); border-radius: 10px; padding: 8px 12px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, .06); }
+.reco { display: grid; grid-template-columns: 1fr auto; background: var(--carte); border-radius: 0; padding: 8px 12px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, .06); }
 .reco-type { font-size: 14px; font-weight: 700; color: var(--accent); }
 .reco-route { font: 800 24px var(--titre); grid-row: 2; }
 .reco-chiffre { font: 800 30px var(--titre); grid-row: 1 / span 2; grid-column: 2; align-self: center; color: var(--accent); }
@@ -157,13 +182,49 @@ main { min-width: 0; }
   .nav-bas button.actif { border-bottom-color: var(--equipe); }
   .cartes { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
   .cartes .carte { margin: 0; }
-  .heatmap-bloc { display: block; margin-top: 10px; }
   .regle { max-width: 520px; }
+  /* Grand écran : contenu centré sur 1440 px, bandes pleine largeur */
+  .marques, .bandeau { padding-left: max(24px, calc((100% - 1440px) / 2 + 24px)); padding-right: max(24px, calc((100% - 1440px) / 2 + 24px)); }
+  .marques { justify-content: flex-start; gap: 18px; }
+  .marques span { flex: none; text-align: left; }
+  .marques img:last-child { margin-left: auto; }
+  .nav-bas { padding-left: max(0px, calc((100% - 1440px) / 2)); padding-right: max(0px, calc((100% - 1440px) / 2)); }
+  .filtres-matrice { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+  .matrice { max-width: 980px; }
+  .hm-case { min-height: 52px; }
+  .hm-case b { font-size: 20px; }
+  .hm-entete, .hm-ligne { font-size: 16px; }
+  .detail { left: auto; right: 24px; bottom: 24px; width: 420px; border-radius: 18px; padding: 20px; }
 }
 @media (min-width: 1100px) {
   .grille { grid-template-columns: 260px minmax(0, 1fr) 300px; }
   .panneau-droit { display: block; position: sticky; top: 72px; align-self: start; }
+  /* Onglet Adversaire : le plan de match occupe toute la largeur, le résumé de droite est inutile */
+  .grille.onglet-adversaire { grid-template-columns: 260px minmax(0, 1fr); }
+  .grille.onglet-adversaire .panneau-droit { display: none; }
+  .groupe-cartes { margin-bottom: 22px; }
+  .titre-groupe { font: 800 26px var(--titre); text-transform: uppercase; margin: 0 0 10px; padding-left: 12px; border-left: 6px solid var(--accent); }
+  .groupe-cartes .cartes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .comparaison:not(.deux) .grille-cibles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .regle { max-width: 760px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .terrain svg, .heatmap, .hm-case { transition: none; animation: none !important; }
+  .terrain svg, .matrice, .hm-case, .squelette div { transition: none; animation: none !important; }
+}
+
+/* ---- Ouverture : écran noir aux deux logos qui s'ouvre en deux ---- */
+.ouverture { position: fixed; inset: 0; z-index: 100; display: flex; overflow: hidden; cursor: pointer; }
+.volet { flex: 1; background: #000; display: flex; align-items: center; transition: transform 1s cubic-bezier(.7, 0, .2, 1); }
+.volet.gauche { justify-content: flex-end; padding-right: clamp(18px, 6vw, 90px); border-right: 1px solid #1a1a1a; }
+.volet.droite { justify-content: flex-start; padding-left: clamp(18px, 6vw, 90px); }
+.volet img { display: block; width: auto; opacity: 0; animation: logo-entre .8s cubic-bezier(.2, .9, .2, 1) .15s forwards; }
+.volet.gauche img { height: clamp(110px, 30vw, 220px); }
+.volet.droite img { height: clamp(56px, 15vw, 110px); animation-delay: .35s; }
+.ouverture.ouvre .volet.gauche { transform: translateX(-101%); }
+.ouverture.ouvre .volet.droite { transform: translateX(101%); }
+@keyframes logo-entre { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .volet { transition: opacity .3s; }
+  .ouverture.ouvre .volet { transform: none; opacity: 0; }
+  .volet img { animation: none; opacity: 1; }
 }

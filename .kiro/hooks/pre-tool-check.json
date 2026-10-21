@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Pre-Tool Safety Check",
+      "trigger": "PreToolUse",
+      "description": "Bloque les commandes dangereuses avant exécution (suppression DB, modif système)",
+      "matcher": "execute_pwsh|fs_write|str_replace|delete_file",
+      "action": {
+        "type": "command",
+        "command": "python .kiro/hooks/pre-tool-check.py",
+        "timeout": 5
+      }
+    }
+  ]
+}

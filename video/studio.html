@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Studio démo — fenêtre de réception</title>
+<!-- Page de mise en scène de la vidéo de démo (1920×1080). L'app React tourne en vrai dans l'iframe ;
+     enregistrer_demo.py pilote l'app et appelle l'API window.studio pour les titres animés.
+     Aucun chiffre n'est écrit ici : tous sont lus dans l'app ou dans les sorties du pipeline. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --equipe: #2a78d6; --encre: #0b0b0b; --bleu: #2a78d6; --orange: #eb6834; --jaune: #ffd84d; --titre: "Barlow Condensed", "Arial Narrow", sans-serif; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: clip; background: #0b0b0b; color: #fff; font: 28px/1.35 "Barlow", system-ui, sans-serif; }
+
+  /* Fond : gazon sombre en bandes qui défilent, halo aux couleurs de la défense choisie */
+  .fond { position: absolute; inset: -200px; background: repeating-linear-gradient(90deg, #0f2414 0 120px, #0c1f11 120px 240px); animation: defile 30s linear infinite; }
+  .fond::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 239px, rgba(255, 255, 255, .06) 239px 241px); }
+  @keyframes defile { to { transform: translateX(240px); } }
+  .halo { position: absolute; inset: 0; background: radial-gradient(900px 700px at 72% 50%, color-mix(in srgb, var(--equipe) 55%, transparent), transparent 70%), linear-gradient(90deg, rgba(11, 11, 11, .92) 0%, rgba(11, 11, 11, .55) 48%, rgba(11, 11, 11, .2) 100%); transition: background 1.2s ease; }
+
+  /* Bandeau des marques */
+  .marques { position: absolute; left: 110px; top: 56px; display: flex; align-items: center; gap: 22px; z-index: 5; }
+  .marques .pastille { background: #fff; border-radius: 12px; padding: 8px 14px; display: flex; align-items: center; gap: 18px; }
+  .marques img { display: block; }
+  .saison { font: 800 26px var(--titre); letter-spacing: 1px; text-transform: uppercase; border: 2px solid rgba(255, 255, 255, .7); border-radius: 999px; padding: 4px 16px; }
+
+  /* Téléphone */
+  .telephone { position: absolute; left: 1150px; top: 50%; width: 449px; height: 958px; margin-top: -479px; border-radius: 64px; background: #050505; padding: 18px;
+    box-shadow: 0 0 0 3px #2b2b2b, 0 40px 90px rgba(0, 0, 0, .65), 0 0 120px color-mix(in srgb, var(--equipe) 40%, transparent);
+    transform: translateY(130%) rotate(6deg); transition: transform 1.3s cubic-bezier(.2, .9, .2, 1); z-index: 3; }
+  .telephone.visible { transform: none; }
+  .ecran { width: 413px; height: 922px; border-radius: 48px; overflow: clip; position: relative; background: #f4f3ef; }
+  .ecran iframe { width: 413px; height: 922px; border: 0; display: block; }
+  .encoche { position: absolute; left: 50%; top: 30px; width: 120px; height: 30px; margin-left: -60px; background: #050505; border-radius: 20px; z-index: 4; }
+
+  /* Légende animée (gauche) */
+  .legende { position: absolute; left: 110px; top: 250px; width: 930px; z-index: 4; }
+  .legende > * { opacity: 0; transform: translateY(26px); }
+  .legende.entre > * { animation: monte .7s cubic-bezier(.2, .9, .2, 1) forwards; }
+  .legende.entre > :nth-child(2) { animation-delay: .08s; }
+  .legende.entre > :nth-child(3) { animation-delay: .16s; }
+  .legende.entre > :nth-child(4) { animation-delay: .26s; }
+  .legende.entre > :nth-child(5) { animation-delay: .36s; }
+  .legende.sort > * { opacity: 1; transform: none; animation: descend .35s ease-in forwards; }
+  @keyframes monte { to { opacity: 1; transform: none; } }
+  @keyframes descend { to { opacity: 0; transform: translateY(-18px); } }
+  .etape { font: 800 30px var(--titre); color: var(--jaune); letter-spacing: 2px; }
+  .etape span { color: rgba(255, 255, 255, .5); }
+  .titre { font: 800 96px/0.95 var(--titre); text-transform: uppercase; margin: 10px 0 18px; text-wrap: balance; }
+  .chiffre { font: 800 168px/0.9 var(--titre); font-variant-numeric: tabular-nums; color: var(--c, #fff); text-shadow: 0 6px 30px rgba(0, 0, 0, .5); }
+  .chiffre small { font-size: 56px; margin-left: 10px; color: rgba(255, 255, 255, .85); }
+  .texte { font-size: 32px; color: rgba(255, 255, 255, .88); max-width: 900px; margin-top: 18px; }
+  .texte b { color: #fff; }
+  .source-chiffre { font-size: 22px; color: rgba(255, 255, 255, .6); margin-top: 22px; border-left: 4px solid var(--jaune); padding-left: 14px; }
+
+  /* Cadre de mise en évidence et toucher simulé */
+  .cadre { position: absolute; z-index: 6; border: 4px solid var(--jaune); border-radius: 18px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0), 0 0 30px rgba(255, 216, 77, .6);
+    opacity: 0; transition: all .55s cubic-bezier(.2, .9, .2, 1); pointer-events: none; }
+  .cadre.on { opacity: 1; }
+  .toucher { position: absolute; z-index: 7; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; background: rgba(255, 255, 255, .55); border: 3px solid #fff; pointer-events: none; animation: tape .7s ease-out forwards; }
+  @keyframes tape { 0% { transform: scale(.4); opacity: 1; } 60% { opacity: .9; } 100% { transform: scale(1.6); opacity: 0; } }
+
+  /* Progression */
+  .progression { position: absolute; left: 110px; right: 840px; bottom: 54px; pointer-events: none; display: flex; gap: 10px; z-index: 4; opacity: 0; transition: opacity .6s; }
+  .progression.visible { opacity: 1; }
+  .progression div { flex: 1; font: 700 20px var(--titre); letter-spacing: 1px; text-transform: uppercase; color: rgba(255, 255, 255, .45); }
+  .progression div i { display: block; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, .18); margin-bottom: 8px; overflow: hidden; }
+  .progression div i::after { content: ""; display: block; height: 100%; width: 0; background: var(--jaune); }
+  .progression div.fait { color: rgba(255, 255, 255, .8); }
+  .progression div.fait i::after { width: 100%; }
+  .progression div.actif { color: #fff; }
+  .progression div.actif i::after { animation: remplit var(--d, 6s) linear forwards; }
+  @keyframes remplit { to { width: 100%; } }
+
+  /* Plein écran : intro et conclusion */
+  .plein { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; justify-content: center; padding: 0 160px; background: rgba(8, 10, 9, .9); opacity: 0; pointer-events: none; transition: opacity .8s; }
+  .plein.visible { opacity: 1; }
+  .plein .surtitre { font: 800 34px var(--titre); color: var(--jaune); letter-spacing: 3px; text-transform: uppercase; }
+  .plein h1 { font: 800 150px/0.92 var(--titre); text-transform: uppercase; margin: 14px 0 26px; }
+  .plein h1 em { font-style: normal; color: var(--jaune); }
+  .plein .question { font-size: 44px; max-width: 1450px; color: rgba(255, 255, 255, .92); }
+  .plein .rangee { display: flex; gap: 70px; margin-top: 60px; }
+  .plein .rangee div { font: 800 110px/0.9 var(--titre); font-variant-numeric: tabular-nums; }
+  .plein .rangee div small { display: block; font: 600 26px "Barlow", sans-serif; color: rgba(255, 255, 255, .7); margin-top: 10px; }
+  .plein .liste { margin-top: 44px; font-size: 32px; color: rgba(255, 255, 255, .88); }
+  .plein .liste p { margin: 10px 0; padding-left: 26px; border-left: 5px solid var(--jaune); }
+  .plein > * { opacity: 0; transform: translateY(30px); }
+  .plein.visible > * { animation: monte .8s cubic-bezier(.2, .9, .2, 1) forwards; }
+  .plein.visible > :nth-child(2) { animation-delay: .15s; }
+  .plein.visible > :nth-child(3) { animation-delay: .35s; }
+  .plein.visible > :nth-child(4) { animation-delay: .6s; }
+  .plein.visible > :nth-child(5) { animation-delay: .85s; }
+  .plein .marques-fin { display: flex; align-items: center; gap: 30px; margin-top: 60px; }
+  .plein .marques-fin .pastille { background: #fff; border-radius: 14px; padding: 12px 22px; display: flex; align-items: center; gap: 26px; }
+</style>
+</head>
+<body>
+  <div class="fond"></div>
+  <div class="halo"></div>
+
+  <div class="marques">
+    <div class="pastille"><img src="../web/public/marques/nfl.png" alt="NFL" height="56"><img src="../web/public/marques/aws.svg" alt="AWS" height="38"></div>
+    <div class="saison" id="saison"></div>
+  </div>
+
+  <div class="telephone" id="telephone"><div class="ecran"><div class="encoche"></div><iframe id="app" title="Application coach"></iframe></div></div>
+
+  <div class="legende" id="legende"></div>
+  <div class="progression" id="progression"></div>
+  <div class="cadre" id="cadre"></div>
+
+  <section class="plein" id="intro"></section>
+  <section class="plein" id="outro"></section>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  $("app").src = params.get("app") || "http://localhost:5173/";
+  const echap = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  /** Compte animé : « +0.3 yd » monte de 0 à 0.3 en gardant signe, décimales et unité. */
+  function compter(el, texte, duree = 1100) {
+    const m = String(texte).match(/^([+\-−]?)(\d+(?:[.,]\d+)?)(.*)$/);
+    if (!m) { el.innerHTML = echap(texte); return; }
+    const [, signe, nombre, reste] = m;
+    const sep = nombre.includes(",") ? "," : ".";
+    const dec = (nombre.split(/[.,]/)[1] || "").length;
+    const cible = parseFloat(nombre.replace(",", "."));
+    const t0 = performance.now();
+    const pas = (t) => {
+      const u = Math.min(1, (t - t0) / duree);
+      const v = cible * (1 - Math.pow(1 - u, 3));
+      el.innerHTML = `${signe}${v.toFixed(dec).replace(".", sep)}<small>${echap(reste.trim())}</small>`;
+      if (u < 1) requestAnimationFrame(pas);
+    };
+    requestAnimationFrame(pas);
+  }
+
+  window.studio = {
+    saison(s) { $("saison").textContent = `Données ${s}`; },
+    couleur(c) { document.documentElement.style.setProperty("--equipe", c); },
+    telephone(v) { $("telephone").classList.toggle("visible", v); },
+    plein(id, html) { const el = $(id); if (html !== undefined) el.innerHTML = html; el.classList.toggle("visible", html !== null); },
+    async legende({ etape, total, titre, chiffre, couleur, texte, source }) {
+      const el = $("legende");
+      if (el.children.length) { el.className = "legende sort"; await new Promise((r) => setTimeout(r, 380)); }
+      el.className = "legende";
+      el.innerHTML = `<div class="etape">${String(etape).padStart(2, "0")} <span>/ ${String(total).padStart(2, "0")}</span></div>
+        <div class="titre">${echap(titre)}</div>
+        ${chiffre ? `<div class="chiffre" style="--c:${couleur || "#fff"}"></div>` : ""}
+        ${texte ? `<div class="texte">${texte}</div>` : ""}
+        ${source ? `<div class="source-chiffre">${echap(source)}</div>` : ""}`;
+      void el.offsetWidth;
+      el.className = "legende entre";
+      if (chiffre) compter(el.querySelector(".chiffre"), chiffre);
+    },
+    progression(libelles, actif, duree) {
+      const el = $("progression");
+      el.classList.toggle("visible", actif >= 0);
+      el.innerHTML = libelles.map((l, i) => `<div class="${i < actif ? "fait" : i === actif ? "actif" : ""}" style="--d:${duree}s"><i></i>${echap(l)}</div>`).join("");
+    },
+    cadre(b, marge = 10) {
+      const el = $("cadre");
+      if (!b) { el.classList.remove("on"); return; }
+      Object.assign(el.style, { left: `${b.x - marge}px`, top: `${b.y - marge}px`, width: `${b.width + 2 * marge}px`, height: `${b.height + 2 * marge}px` });
+      el.classList.add("on");
+    },
+    toucher(x, y) {
+      const t = document.createElement("div");
+      t.className = "toucher";
+      Object.assign(t.style, { left: `${x}px`, top: `${y}px` });
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 800);
+    },
+  };
+</script>
+</body>
+</html>
