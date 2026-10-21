@@ -1,5 +1,3 @@
-# 🏈 Coach Cockpit NFL
+# NFL Coach Cockpit - Analyse des Fenêtres de Réception
 
-Outil d'analyse tactique pour coordinateurs offensifs NFL utilisant les données Next Gen Stats. Ce projet calcule le **taux d'érosion de la fenêtre de réception** (closing rate) entre receveurs et défenseurs durant la phase de vol du ballon, permettant d'identifier les routes et matchups les plus efficaces. Développé avec **Kiro AI**, incluant skills NFL (géométrie/physique), spécifications EARS, et hooks de validation automatique.
-
-**Démarrage rapide** : `.\install-mcp.ps1` puis voir [`.kiro/GETTING-STARTED.md`](.kiro/GETTING-STARTED.md) | **Documentation** : [`QUICK-START.md`](QUICK-START.md)
+**Problématique :** Les entraîneurs NFL ont besoin d'analyser en temps réel la vitesse de fermeture des fenêtres de réception pour optimiser les décisions de passes. **Solution :** Dashboard React avec analyse prédictive (DuckDB + Plotly) ciblant 3 personas (Coach, Scout, Broadcast) affichant separation, closing velocity et risk scores avec replay 2D synchronisé. **Installation :** `npm install && npm run dev` (nécessite Node 18+, DuckDB via MCP). **Architecture :** Pipeline ETL (tracking NFL → normalization angles 0°=Nord → physics validation v≤13yd/s, a≤8yd/s² → agrégation DuckDB → visualisation React). **Démo live :** [Vercel deployment](https://teams-aws-bjs.vercel.app)
