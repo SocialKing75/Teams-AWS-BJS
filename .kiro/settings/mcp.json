@@ -1,0 +1,25 @@
+﻿{
+  "mcpServers": {
+    "duckdb": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-duckdb",
+        "--db-path",
+        "nfl_analysis.duckdb"
+      ],
+      "env": {
+        "DUCKDB_ENABLE_OBJECT_CACHE": "true"
+      },
+      "disabled": false
+    },
+    "filesystem": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-filesystem",
+        "C:\\Users\\nguen\\Teams-AWS-BJS\\nfl-big-data-bowl-regional-event-data\\data"
+      ],
+      "env": {},
+      "disabled": false
+    }
+  }
+}

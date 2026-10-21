@@ -52,6 +52,10 @@ La défense mise en avant est choisie par les données (la carte « à attaquer 
 
 **Logos et couleurs** : logos NFL et AWS dans `web/public/marques/` (`aws-blanc.svg` : texte passé en blanc pour l'écran noir d'ouverture) ; logos des clubs : table publique nflverse (`data/reference/equipes_nflverse.csv`), jointe par abréviation d'équipe ; le pipeline télécharge les logos dans `web/public/logos/` (non versionné). Les logos sont des marques de la NFL et des clubs, utilisés ici pour identifier les équipes dans un projet de compétition non commercial. Sans réseau, chaque logo est remplacé par un badge aux couleurs de l'équipe.
 
+### Configuration Kiro de l'équipe
+
+Spécifications (`.kiro/specs/`), hooks de validation, skills NFL et serveurs MCP : voir [`README-KIRO.md`](README-KIRO.md), [`QUICK-START.md`](QUICK-START.md) et [`MCP-SETUP-GUIDE.md`](MCP-SETUP-GUIDE.md).
+
 ## La métrique
 
 **Fenêtre de réception** d'une passe, en yards :

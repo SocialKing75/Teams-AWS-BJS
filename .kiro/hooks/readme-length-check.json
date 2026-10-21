@@ -1,0 +1,17 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "README Length Validator",
+      "trigger": "PostToolUse",
+      "description": "Vérifie que le README reste concis (3-5 phrases max)",
+      "matcher": "fs_write|str_replace",
+      "action": {
+        "type": "command",
+        "command": "python .kiro/hooks/readme-length-check.py",
+        "timeout": 10
+      },
+      "enabled": true
+    }
+  ]
+}
