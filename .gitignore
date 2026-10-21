@@ -1,0 +1,32 @@
+# --- Claude / AI artifacts (ne jamais pousser) ---
+CLAUDE.md
+**/CLAUDE.md
+.claude/
+.claude.json
+.claude.json.backup
+
+# --- Données volumineuses NFL (ne pas pousser) ---
+data/
+*.csv
+*.zip
+tracking_*.csv
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# --- Node / TS ---
+node_modules/
+dist/
+build/
+.env
+.env.local
+*.log
+
+# --- OS ---
+.DS_Store
+Thumbs.db
