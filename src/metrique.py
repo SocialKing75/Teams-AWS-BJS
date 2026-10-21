@@ -27,6 +27,9 @@ import pandas as pd
 
 CLE = ["game_id", "play_id"]
 SEUIL_PROFONDE = 15   # yards de pass_length à partir desquels une passe est "profonde"
+# Tranches de yards à gagner (spec reception-window-coach) : partagées par les tables coach et le contrat du front
+BORNES_DISTANCE = [0, 3, 6, np.inf]
+TRANCHES_DISTANCE = ["1-3", "4-6", "7+"]
 
 
 def _derniere_frame(df: pd.DataFrame) -> pd.DataFrame:
@@ -92,7 +95,8 @@ def table_fenetres(defs: pd.DataFrame, seuil_profonde: int = SEUIL_PROFONDE) -> 
     f["variation_fenetre"] = f["fenetre_arrivee"] - f["fenetre_lancer"]
     f["profondeur"] = np.where(f.pass_length >= seuil_profonde, f"Profonde (>= {seuil_profonde} yd)", f"Courte (< {seuil_profonde} yd)")
     f["situation_down"] = f["down"].clip(upper=3).map({1: "1er down", 2: "2e down", 3: "3e/4e down"})
-    f["situation_distance"] = pd.cut(f.yards_to_go, [0, 3, 7, np.inf], labels=["Courte (1-3 yd)", "Moyenne (4-7 yd)", "Longue (8+ yd)"])
+    f["situation_distance"] = pd.cut(f.yards_to_go, BORNES_DISTANCE,
+                                     labels=[f"{nom} ({t} yd)" for nom, t in zip(["Courte", "Moyenne", "Longue"], TRANCHES_DISTANCE)])
     return f
 
 

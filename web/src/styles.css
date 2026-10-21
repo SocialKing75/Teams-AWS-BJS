@@ -228,3 +228,13 @@ main { min-width: 0; }
   .ouverture.ouvre .volet { transform: none; opacity: 0; }
   .volet img { animation: none; opacity: 1; }
 }
+
+/* Adversaire : toutes les routes de la défense, écart à la ligue */
+.toutes-routes { background: var(--carte); border-radius: 18px; padding: 12px; margin: 0 0 16px; box-shadow: 0 6px 18px rgba(0,0,0,.08); }
+.toutes-routes ul { list-style: none; margin: 0; padding: 0; }
+.toutes-routes li { display: grid; grid-template-columns: 64px minmax(0, 1fr) 64px; grid-template-areas: "route barre chiffre" ". detail detail"; align-items: center; gap: 2px 8px; padding: 6px 0; }
+.tr-route { grid-area: route; font-weight: 700; }
+.tr-barre { grid-area: barre; position: relative; height: 12px; background: linear-gradient(currentColor, currentColor) 50% 0 / 1px 100% no-repeat; color: var(--trait, #c9c8c2); }
+.tr-barre i { position: absolute; top: 2px; height: 8px; border-radius: 4px; }
+.tr-chiffre { grid-area: chiffre; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tr-detail { grid-area: detail; font-size: 12px; opacity: .75; }

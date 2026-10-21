@@ -44,6 +44,11 @@ def exporter(sorties: str = "outputs", clean: str = os.path.join("data", "clean"
     ligue_routes = (fen.groupby("route_of_targeted_receiver")
                     .agg(fenetre_lancer=("fenetre_lancer", "mean"), fenetre_arrivee=("fenetre_arrivee", "mean"), n=("play_id", "size"))
                     .round(2).reset_index().rename(columns={"route_of_targeted_receiver": "route"}))
+    # Toutes les routes de chaque défense (n >= n_min équipe), écart à la ligue calculé comme pour les cartes
+    moy_route = fen.groupby("route_of_targeted_receiver").fenetre_arrivee.mean().round(3)
+    equipes_routes = lire("coach_equipes_routes").rename(columns={"route_of_targeted_receiver": "route"})
+    equipes_routes["fenetre_ligue"] = equipes_routes.route.map(moy_route)
+    equipes_routes["ecart_vs_ligue"] = (equipes_routes.fenetre_arrivee_moy - equipes_routes.fenetre_ligue).round(2)
     classement = (fen.groupby("defensive_team").agg(fenetre=("fenetre_arrivee", "mean"), fenetre_lancer=("fenetre_lancer", "mean"), n=("play_id", "size"))
                   .round(2).reset_index().sort_values("fenetre"))
     donnees = {
@@ -52,6 +57,7 @@ def exporter(sorties: str = "outputs", clean: str = os.path.join("data", "clean"
         "defenses": sorted(fen.defensive_team.unique().tolist()),
         "cartes": lire("coach_cartes_telephone").to_dict("records"),
         "equipes": lire("coach_equipes").to_dict("records"),
+        "equipes_routes": equipes_routes.to_dict("records"),
         "synthese": lire("coach_synthese").to_dict("records"),
         "situations": lire("coach_situations").to_dict("records"),
         "ligue": lire("coach_ligue").to_dict("records"),

@@ -3,8 +3,8 @@ Fichiers du contrat d'interface de l'équipe (.kiro/specs/*/design.md), lus par 
 
 - matchups.json : une ligne par cellule de situation (couverture × man/zone × route × profondeur
   × down × distance), avec les sommes et n pour ré-agréger côté front (moyenne = Σ sum / Σ n).
-  Schéma exact de reception-window-coach/design.md §5, plus deux champs ajoutés pour recalculer
-  un intervalle de confiance après filtrage : sum_closing_sq et sum_window_arrival_sq.
+  Schéma exact de reception-window-coach/design.md §5, plus des champs ajoutés : sum_closing_sq et
+  sum_window_arrival_sq (intervalle de confiance après filtrage), sum_epa (EPA moyen = Σ sum_epa / Σ n).
 - play.json : actions réelles image par image (schéma de mock/play.json), une par carte
   « défense × route » de l'onglet Adversaire, choisie comme la plus représentative de la moyenne.
 
@@ -18,6 +18,8 @@ import os
 import numpy as np
 import pandas as pd
 
+from metrique import BORNES_DISTANCE, SEUIL_PROFONDE, TRANCHES_DISTANCE
+
 CLE = ["game_id", "play_id"]
 ROUTES_VALIDES = ["HITCH", "OUT", "FLAT", "CROSS", "GO", "IN", "SLANT", "POST", "ANGLE", "CORNER", "WHEEL", "SCREEN"]
 # Libellés de couverture du spec (vocabulaire PFF de la documentation officielle)
@@ -25,7 +27,6 @@ COUVERTURES = {"COVER_0_MAN": "Cover-0", "COVER_1_MAN": "Cover-1", "COVER_2_MAN"
                "COVER_3_ZONE": "Cover-3", "COVER_4_ZONE": "Quarters", "COVER_6_ZONE": "Cover-6", "PREVENT": "Prevent"}
 MAN_ZONE = {"MAN_COVERAGE": "Man", "ZONE_COVERAGE": "Zone"}
 RESULTATS = {"C": "Passe complète", "I": "Passe incomplète", "IN": "Interception"}
-SEUIL_PROFONDE = 15  # yards de pass_length
 LONGUEUR, LARGEUR = 120.0, 53.3
 
 
@@ -41,7 +42,7 @@ def preparer_situations(fen: pd.DataFrame) -> pd.DataFrame:
     f["man_zone"] = f.team_coverage_man_zone.map(MAN_ZONE)
     f["route"] = f.route_of_targeted_receiver
     f["depth"] = np.where(f.pass_length >= SEUIL_PROFONDE, "deep", "short")
-    f["dist_bucket"] = pd.cut(f.yards_to_go, [0, 3, 6, np.inf], labels=["1-3", "4-6", "7+"]).astype(str)
+    f["dist_bucket"] = pd.cut(f.yards_to_go, BORNES_DISTANCE, labels=TRANCHES_DISTANCE).astype(str)
     f["closing"] = f.fenetre_lancer - f.fenetre_arrivee
     return f.dropna(subset=["man_zone"])
 
@@ -65,6 +66,7 @@ def matchups(fen: pd.DataFrame, n_boot: int = 1000, graine: int = 0) -> list[dic
             "sum_closing": round(float(c.sum()), 3),
             "sum_closing_sq": round(float((c ** 2).sum()), 3),
             "sum_window_arrival_sq": round(float((a ** 2).sum()), 3),
+            "sum_epa": round(float(g.expected_points_added.sum()), 3),
             "n_open": int((a >= 3).sum()), "n_contested": int((a < 1).sum()),
             "avg_window_throw": round(float(g.fenetre_lancer.mean()), 2),
             "separation": round(float(sep), 2), "separation_label": libelle_separation(sep),

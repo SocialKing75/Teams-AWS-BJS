@@ -319,6 +319,35 @@ function Cible({ titre, ligne, ligue, couleur, d3, abr }) {
   );
 }
 
+/** Toutes les routes de la défense : écart à la ligue à l'arrivée ; barre vers la droite = plus ouverte que la ligue. */
+function ToutesRoutes({ abr }) {
+  const lignes = data.equipes_routes.filter((r) => r.defensive_team === abr).sort((a, b) => b.ecart_vs_ligue - a.ecart_vs_ligue);
+  const max = Math.max(0.5, ...lignes.map((r) => Math.abs(r.ecart_vs_ligue)));
+  return (
+    <div className="toutes-routes">
+      <h2 className="titre-groupe">Toutes les routes contre {info(abr).surnom}</h2>
+      {lignes.length === 0 ? <p className="info">Aucune route avec assez de passes pour cette défense.</p> : (
+        <ul>
+          {lignes.map((r) => {
+            const l = (Math.abs(r.ecart_vs_ligue) / max) * 50;
+            return (
+              <li key={r.route} title={`${r.route} : ${yd(r.fenetre_lancer_moy)} au lancer → ${yd(r.fenetre_arrivee_moy)} à l'arrivée · ligue ${yd(r.fenetre_ligue)}`}>
+                <span className="tr-route">{r.route}</span>
+                <span className="tr-barre" aria-hidden="true">
+                  <i style={{ left: r.ecart_vs_ligue >= 0 ? "50%" : `${50 - l}%`, width: `${l}%`, background: r.ecart_vs_ligue >= 0 ? BLEU : ORANGE }} />
+                </span>
+                <span className="tr-chiffre">{yd(r.ecart_vs_ligue, true)}</span>
+                <span className="tr-detail">{yd(r.fenetre_arrivee_moy)} à l'arrivée · {r.n_actions} passes · {pct(r.taux_completion)} complétées</span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <p className="note">Écart à la moyenne de la ligue sur la même route, fenêtre à l'arrivée du ballon. Vers la droite : plus ouverte que la ligue. Routes avec moins de 15 passes masquées.</p>
+    </div>
+  );
+}
+
 const CASES_MZ = [["MAN_COVERAGE", "Courte"], ["MAN_COVERAGE", "Profonde"], ["ZONE_COVERAGE", "Courte"], ["ZONE_COVERAGE", "Profonde"]];
 const trouveMZ = (rows, mz, prof) => rows.find((r) => r.team_coverage_man_zone === mz && r.profondeur.startsWith(prof));
 
@@ -362,11 +391,11 @@ const SEUIL_N = 10;
  *  si la case vient d'une seule ligne, sinon approximation normale à partir des sommes de carrés. */
 function agreger(lignes) {
   const s = lignes.reduce((a, r) => ({ n: a.n + r.n, wt: a.wt + r.sum_window_throw, wa: a.wa + r.sum_window_arrival, c: a.c + r.sum_closing,
-    c2: a.c2 + r.sum_closing_sq, o: a.o + r.n_open, k: a.k + r.n_contested }), { n: 0, wt: 0, wa: 0, c: 0, c2: 0, o: 0, k: 0 });
+    c2: a.c2 + r.sum_closing_sq, o: a.o + r.n_open, k: a.k + r.n_contested, ep: a.ep + r.sum_epa }), { n: 0, wt: 0, wa: 0, c: 0, c2: 0, o: 0, k: 0, ep: 0 });
   if (!s.n) return null;
   const moy = s.c / s.n;
   const et = Math.sqrt(Math.max(0, s.c2 / s.n - moy * moy) / s.n);
-  return { n: s.n, sep: s.wa / s.n, lancer: s.wt / s.n, fermeture: moy, ouvert: s.o / s.n, conteste: s.k / s.n,
+  return { n: s.n, sep: s.wa / s.n, lancer: s.wt / s.n, fermeture: moy, ouvert: s.o / s.n, conteste: s.k / s.n, epa: s.ep / s.n,
     ic: lignes.length === 1 ? lignes[0].ci : [moy - 1.96 * et, moy + 1.96 * et], icBoot: lignes.length === 1 };
 }
 
@@ -405,6 +434,8 @@ function EcranMatrice({ matchups, d3 }) {
   const lignes = matchups.filter((r) => (mz === "tous" || r.man_zone === mz) && (prof === "tous" || r.depth === prof)
     && (down === "tous" || String(r.down) === down) && (dist === "tous" || r.dist_bucket === dist));
   const total = agreger(lignes);
+  const tranches = [...new Set(matchups.map((r) => r.dist_bucket))].sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+  const libTranche = (t) => (t.endsWith("+") ? `${t.slice(0, -1)} et +` : t.replace("-", " à "));
   const couvs = ORDRE_COUV.filter((c) => lignes.some((r) => r.coverage_type === c));
   const routes = ORDRE_ROUTES.filter((r) => lignes.some((l) => l.route === r));
   const cellule = (route, couv) => agreger(lignes.filter((l) => l.route === route && l.coverage_type === couv));
@@ -420,7 +451,7 @@ function EcranMatrice({ matchups, d3 }) {
         <div className="filtre"><span className="filtre-titre">Down</span>
           <Segment label="Down" valeur={down} onChange={filtrer(setDown)} options={[["tous", <>Tous<small>downs</small></>], ["1", <>1er<small>down</small></>], ["2", <>2e<small>down</small></>], ["3", <>3e<small>down</small></>], ["4", <>4e<small>down</small></>]]} /></div>
         <div className="filtre"><span className="filtre-titre">Distance à gagner (yards to go)</span>
-          <Segment label="Distance" valeur={dist} onChange={filtrer(setDist)} options={[["tous", <>Toutes<small>distances</small></>], ["1-3", <>1 à 3<small>yd à gagner</small></>], ["4-6", <>4 à 6<small>yd à gagner</small></>], ["7+", <>7 et +<small>yd à gagner</small></>]]} /></div>
+          <Segment label="Distance" valeur={dist} onChange={filtrer(setDist)} options={[["tous", <>Toutes<small>distances</small></>], ...tranches.map((t) => [t, <>{libTranche(t)}<small>yd à gagner</small></>])]} /></div>
       </div>
       {total && <p className="resume-matrice"><b>{total.n}</b> passes · séparation moyenne <b>{yd(total.sep)}</b> · {libSep(total.sep)}</p>}
       <div ref={scene} className={`heatmap-scene ${d3 ? "d3" : ""}`} style={{ marginTop: -marge }}>
@@ -458,6 +489,7 @@ function EcranMatrice({ matchups, d3 }) {
           <p>Séparation à l'arrivée du ballon.</p>
           <p>Grand ouvert sur <b>{pct(sel.v.ouvert)}</b> des actions, contesté sur <b>{pct(sel.v.conteste)}</b>.</p>
           <p>Fenêtre passée de <b>{yd(sel.v.lancer)}</b> au lancer à <b>{yd(sel.v.sep)}</b> à l'arrivée.</p>
+          {Number.isFinite(sel.v.epa) && <p>EPA moyen de l'attaque : <b>{sel.v.epa > 0 ? "+" : ""}{sel.v.epa.toFixed(2)}</b> point par passe.</p>}
           <p className="note">{sel.v.n} passes · fermeture moyenne {yd(sel.v.fermeture, true)}, IC 95 % [{sel.v.ic[0].toFixed(1)} ; {sel.v.ic[1].toFixed(1)}] yd {sel.v.icBoot ? "(bootstrap)" : "(approximation normale)"}</p>
         </div>
       )}
@@ -653,6 +685,7 @@ export default function App() {
                   {rendreCartes(cartesGenre)}
                 </>
               )}
+              <ToutesRoutes abr={abr} />
               <p className="note">Chaque carte rejoue l'action réelle de cette défense la plus proche de sa moyenne sur la route : trajectoires mesurées du receveur ciblé (blanc) et du défenseur le plus proche au lancer (logo), ballon interpolé du passeur au point de chute. Cercle blanc : fenêtre de réception. Cercle jaune : moyenne de la ligue sur la route à l'arrivée. Confiance élevée si ≥ 50 passes et écart ≥ 0,5 yd ; moyenne si ≥ 30 et ≥ 0,3 ; faible sinon.</p>
             </section>
           )}
