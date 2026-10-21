@@ -1,0 +1,169 @@
+/* Mobile-first, plein soleil : contraste maximal, texte ≥ 16 px, zones tactiles ≥ 44 px.
+   Typo sportive condensée pour les chiffres et titres, terrain en SVG pour les visuels. */
+:root {
+  --encre: #0b0b0b;
+  --encre2: #52514e;
+  --bleu: #2a78d6;
+  --orange: #eb6834;
+  --jaune: #ffd84d;
+  --fond: #f4f3ef;
+  --carte: #ffffff;
+  --equipe: #1a1a19;
+  --equipe2: #c3c2b7;
+  --titre: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--fond); color: var(--encre); font: 17px/1.4 "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.app { overflow-x: hidden; padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+
+/* ---- Bande des marques (NFL, AWS) ---- */
+.marques { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 16px; background: #fff; border-bottom: 1px solid #e6e5e0; font-size: 13px; color: var(--encre2); }
+.marques img { display: block; width: auto; flex: none; }
+.marques span { flex: 1; text-align: center; font-weight: 600; letter-spacing: .3px; }
+
+/* ---- Bandeau aux couleurs de la défense adverse ---- */
+.bandeau { background: linear-gradient(135deg, var(--equipe) 0%, color-mix(in srgb, var(--equipe) 70%, #000) 100%); color: #fff; padding: 12px 16px 10px; border-bottom: 5px solid var(--equipe2); }
+.bandeau-equipe { display: flex; align-items: center; gap: 12px; width: 100%; background: none; border: 0; padding: 0; text-align: left; min-height: 64px; color: #fff; }
+.logo-cadre { background: #fff; border-radius: 50%; width: 70px; height: 70px; display: grid; place-items: center; flex: none; box-shadow: 0 2px 10px rgba(0, 0, 0, .35); }
+.bandeau-texte small { display: block; font-size: 14px; opacity: .9; }
+.bandeau-texte strong { display: block; font-family: var(--titre); font-weight: 800; font-size: 30px; line-height: 1.02; text-transform: uppercase; letter-spacing: .5px; text-shadow: 0 1px 2px rgba(0, 0, 0, .5); }
+.bandeau-pied { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 8px; font-size: 15px; }
+.bandeau-pied .segment { flex: none; width: 128px; margin: 0; }
+.bandeau-pied .segment button { min-height: 44px; border-color: #fff; color: #fff; background: transparent; }
+.bandeau-pied .segment button.actif { background: #fff; color: var(--encre); }
+
+.grille { padding: 12px 16px 0; }
+.panneau-gauche, .panneau-droit { display: none; }
+main { min-width: 0; }
+
+/* ---- Contrôles ---- */
+.segment { display: flex; gap: 8px; margin: 0 0 12px; }
+.segment button { flex: 1; min-height: 48px; font-weight: 700; font-size: 16px; border: 2px solid var(--encre); border-radius: 12px; background: var(--carte); }
+.segment button.actif { background: var(--encre); color: #fff; }
+
+/* ---- Cartes route ---- */
+.carte { background: var(--carte); border-radius: 18px; padding: 12px; margin: 0 0 16px; box-shadow: 0 2px 0 var(--accent), 0 6px 18px rgba(0, 0, 0, .08); border-top: 6px solid var(--accent); }
+.carte-tete { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
+.carte-route { font-family: var(--titre); font-weight: 800; font-size: 34px; line-height: 1; text-transform: uppercase; }
+.carte-verbe { font-weight: 700; color: var(--accent); font-size: 17px; }
+.carte-chiffre { font-family: var(--titre); font-weight: 800; font-size: 52px; line-height: .9; color: var(--accent); text-align: right; }
+.carte-chiffre small { display: block; font-family: "Barlow", sans-serif; font-size: 14px; font-weight: 600; color: var(--encre2); }
+.carte-detail { margin: 8px 2px 0; font-size: 16px; color: var(--encre2); }
+.carte-detail b { color: var(--encre); }
+.badge { display: inline-block; padding: 1px 10px; border-radius: 999px; font-size: 15px; font-weight: 700; color: #fff; }
+
+/* ---- Terrain 2D / 3D ---- */
+.terrain { position: relative; width: 100%; border-radius: 14px; overflow: hidden; background: radial-gradient(ellipse at 50% 0%, #2d3b52 0%, #0f1622 70%); }
+.terrain svg { display: block; width: 100%; height: auto; transform-origin: 50% 100%; }
+.terrain.d3 { perspective: 820px; perspective-origin: 50% 30%; }
+.terrain.d3 svg { position: absolute; left: 0; bottom: 0; transform: rotateX(40deg); animation: camera .6s cubic-bezier(.2, .8, .2, 1); }
+@keyframes camera { from { transform: rotateX(0deg); } to { transform: rotateX(40deg); } }
+.svg-etiquette { font: 700 1.9px "Barlow", sans-serif; paint-order: stroke; stroke: rgba(0, 0, 0, .55); stroke-width: .3px; }
+.svg-valeur { font: 800 3px "Barlow Condensed", sans-serif; fill: #fff; paint-order: stroke; stroke: rgba(0, 0, 0, .5); stroke-width: .35px; }
+.habillage { position: absolute; inset: 0; pointer-events: none; }
+.puce-fenetre { position: absolute; left: 10px; top: 10px; background: rgba(11, 11, 11, .82); color: #fff; border-radius: 10px; padding: 6px 10px; border-left: 4px solid #fff; }
+.puce-fenetre span { display: block; font-size: 13px; opacity: .85; }
+.puce-reelle { position: absolute; right: 10px; top: 10px; background: #fff; color: #0b0b0b; border-radius: 999px; padding: 4px 10px; font-size: 13px; font-weight: 700; }
+.puce-fenetre b { font-family: var(--titre); font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
+
+/* ---- Écran man / zone ---- */
+.titre-ecran { font-family: var(--titre); font-weight: 800; font-size: 26px; text-transform: uppercase; margin: 4px 0 6px; line-height: 1.05; }
+.legende-scene { font-size: 15px; color: var(--encre2); margin: 0 0 10px; }
+.pastille { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: -2px; margin-right: 2px; }
+.pastille.blanc { background: #2a7d34; box-shadow: inset 0 0 0 7px rgba(255, 255, 255, .6); }
+.pastille.pointille { border: 2px dashed #2a7d34; }
+.pastille.jaune { border: 2px dashed #c99a00; }
+.titre-equipe { display: flex; align-items: center; gap: 8px; font-family: var(--titre); font-size: 22px; text-transform: uppercase; margin: 6px 0; }
+.grille-cibles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cible { margin: 0; background: var(--carte); border-radius: 14px; padding: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, .07); }
+.cible figcaption { display: flex; flex-direction: column; padding: 6px 4px 2px; font-size: 14px; color: var(--encre2); }
+.cible figcaption b { color: var(--encre); font-size: 16px; }
+.cible-chiffre { font-family: var(--titre); font-weight: 800; font-size: 34px; line-height: 1; color: var(--encre); }
+.jaune { color: #8a6a00; font-weight: 700; }
+.comparaison.deux { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* ---- Écran ligue : logos sur une règle ---- */
+.regle { position: relative; margin: 8px 0 20px; background: linear-gradient(90deg, #2a7d34, #2f8a3a); border-radius: 14px; }
+.graduation { position: absolute; left: 0; right: 0; border-top: 2px solid rgba(255, 255, 255, .55); }
+.graduation span { position: absolute; left: 6px; top: -11px; font: 800 16px var(--titre); color: #fff; background: #2a7d34; padding: 0 3px; }
+.ligne-ligue { position: absolute; left: 56px; right: 0; border-top: 3px dashed var(--jaune); z-index: 1; }
+.ligne-ligue span { position: absolute; right: 6px; top: -24px; font: 800 16px var(--titre); color: var(--jaune); text-shadow: 0 1px 2px #000; }
+.logo-regle { position: absolute; width: 44px; height: 44px; padding: 2px; border: 0; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0, 0, 0, .35); z-index: 2; transform: translateY(0); }
+.logo-regle.choisi { outline: 4px solid var(--jaune); outline-offset: 1px; z-index: 3; }
+.logo { object-fit: contain; display: block; }
+.logo-badge { display: grid; place-items: center; border-radius: 50%; color: #fff; font-weight: 800; font-family: var(--titre); }
+
+/* ---- Heatmap (tablette / PC) ---- */
+.heatmap-bloc { display: none; }
+.heatmap-scene { perspective: 1000px; }
+.heatmap { display: grid; gap: 3px; transition: transform .6s ease; transform-origin: 50% 100%; }
+.heatmap-scene.d3 .heatmap { transform: rotateX(38deg) rotateZ(-8deg); }
+.heatmap-scene.d3 .hm-case { box-shadow: 0 var(--h, 0) 0 rgba(0, 0, 0, .35); transform: translateY(calc(var(--h, 0) * -1)); }
+.hm-entete { font: 800 13px var(--titre); text-align: center; align-self: end; }
+.hm-ligne { font: 700 13px var(--titre); align-self: center; }
+.hm-case { min-height: 46px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #e6e5e0; transition: transform .6s ease, box-shadow .6s ease; }
+.hm-case b { font: 800 17px var(--titre); }
+.hm-case small { font-size: 11px; opacity: .85; }
+
+/* ---- Sélecteur d'équipes (logos) ---- */
+.selecteur { position: fixed; inset: 0; z-index: 20; background: var(--fond); overflow-y: auto; padding: 12px 16px 24px; }
+.selecteur-tete { display: flex; justify-content: space-between; align-items: center; }
+.selecteur-tete h2 { font-family: var(--titre); font-size: 28px; text-transform: uppercase; margin: 6px 0 10px; }
+.fermer { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--encre); background: var(--carte); font-size: 22px; font-weight: 800; }
+.grille-logos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.grille-logos button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; min-height: 78px; border: 2px solid transparent; border-radius: 14px; background: var(--carte); box-shadow: 0 2px 6px rgba(0, 0, 0, .06); font: 800 15px var(--titre); }
+.grille-logos button.choisi { border-color: var(--encre); }
+
+/* ---- Recommandations (PC) ---- */
+.panneau-droit h2 { display: flex; align-items: center; gap: 8px; font-family: var(--titre); font-size: 24px; text-transform: uppercase; margin: 0 0 10px; }
+.reco { display: grid; grid-template-columns: 1fr auto; background: var(--carte); border-left: 6px solid var(--accent); border-radius: 10px; padding: 8px 12px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, .06); }
+.reco-type { font-size: 14px; font-weight: 700; color: var(--accent); }
+.reco-route { font: 800 24px var(--titre); grid-row: 2; }
+.reco-chiffre { font: 800 30px var(--titre); grid-row: 1 / span 2; grid-column: 2; align-self: center; color: var(--accent); }
+.reco-detail { font-size: 14px; color: var(--encre2); grid-column: 1 / span 2; }
+
+/* ---- Navigation au pouce ---- */
+.nav-bas { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: flex; background: #fff; border-top: 1px solid #dddcd6; padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -4px 14px rgba(0, 0, 0, .08); }
+.nav-bas button { flex: 1; min-height: 64px; border: 0; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; font-weight: 700; color: var(--encre2); border-top: 4px solid transparent; }
+.nav-bas button svg { fill: currentColor; }
+.nav-bas button.actif { color: var(--encre); border-top-color: var(--equipe); }
+
+.note, .info { font-size: 15px; color: var(--encre2); }
+.info { font-size: 17px; color: var(--encre); }
+.source { font-size: 13px; color: var(--encre2); margin: 18px 0 8px; }
+.comparer { display: none; }
+
+/* ---- Tablette / PC : filtres à gauche, visuel au centre, recommandations à droite ---- */
+@media (min-width: 768px) {
+  .app { padding-bottom: 0; }
+  .bandeau { padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+  .bandeau-equipe { width: auto; pointer-events: none; }
+  .bandeau-texte small { display: none; }
+  .bandeau-pied { margin: 0; gap: 18px; }
+  .grille { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 24px; padding: 18px 24px 24px; max-width: 1440px; margin: 0 auto; }
+  .panneau-gauche { display: block; position: sticky; top: 12px; align-self: start; }
+  .panneau-gauche .selecteur { position: static; padding: 0; background: none; overflow: visible; }
+  .panneau-gauche .selecteur-tete h2 { font-size: 20px; margin: 0 0 8px; }
+  .panneau-gauche .grille-logos { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .panneau-gauche .grille-logos button { min-height: 62px; padding: 4px 2px; font-size: 13px; }
+  .panneau-gauche .grille-logos .logo, .panneau-gauche .grille-logos .logo-badge { width: 34px; height: 34px; }
+  .comparer { display: block; margin-top: 14px; }
+  .comparer label { display: block; font-weight: 700; margin-bottom: 4px; }
+  .comparer select { width: 100%; min-height: 44px; font-size: 16px; border: 2px solid var(--encre); border-radius: 10px; padding: 0 8px; background: var(--carte); }
+  .nav-bas { position: sticky; top: 0; box-shadow: none; border-top: 0; border-bottom: 1px solid #dddcd6; }
+  .nav-bas button { flex-direction: row; gap: 8px; min-height: 56px; font-size: 16px; border-top: 0; border-bottom: 4px solid transparent; }
+  .nav-bas button.actif { border-bottom-color: var(--equipe); }
+  .cartes { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+  .cartes .carte { margin: 0; }
+  .heatmap-bloc { display: block; margin-top: 10px; }
+  .regle { max-width: 520px; }
+}
+@media (min-width: 1100px) {
+  .grille { grid-template-columns: 260px minmax(0, 1fr) 300px; }
+  .panneau-droit { display: block; position: sticky; top: 72px; align-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .terrain svg, .heatmap, .hm-case { transition: none; animation: none !important; }
+}
