@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Physics Constraints Validator",
+      "trigger": "PostToolUse",
+      "description": "Valide que les constantes physiques NFL respectent les limites biomécaniques après édition de fichiers",
+      "matcher": "fs_write|str_replace",
+      "action": {
+        "type": "command",
+        "command": "python .kiro/hooks/physics-guardrail.py",
+        "timeout": 30
+      }
+    }
+  ]
+}
