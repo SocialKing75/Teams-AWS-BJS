@@ -10,7 +10,8 @@
         "type": "command",
         "command": "python .kiro/hooks/readme-length-check.py",
         "timeout": 10
-      }
+      },
+      "enabled": true
     }
   ]
 }

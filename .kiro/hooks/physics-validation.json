@@ -10,7 +10,8 @@
         "type": "command",
         "command": "python .kiro/hooks/physics-guardrail.py",
         "timeout": 30
-      }
+      },
+      "enabled": true
     }
   ]
 }
