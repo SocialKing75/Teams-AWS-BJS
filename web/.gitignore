@@ -1,3 +1,6 @@
 node_modules/
 dist/
 public/logos/
+
+.vercel
+.env*
