@@ -21,6 +21,13 @@ data/
 *.zip
 tracking_*.csv
 
+# --- Artefacts générés par la couche d'analyse (régénérables) ---
+outputs/
+*.parquet
+
+# --- Pytest ---
+.pytest_cache/
+
 # --- Python ---
 __pycache__/
 *.py[cod]
