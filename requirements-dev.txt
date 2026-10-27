@@ -1,0 +1,11 @@
+# Dépendances pour exécuter la couche kaggle_2027 et sa suite de tests.
+# Versions entre parenthèses = versions testées localement (2026-10).
+
+# --- Runtime de la couche d'analyse ---
+numpy          # (2.3.3)
+pandas         # (2.3.3)
+pyarrow        # (21.0.0) — lecture/écriture Parquet
+scikit-learn   # (1.7.2)  — baseline Phase 7
+
+# --- Tests ---
+pytest         # (9.0.3)
